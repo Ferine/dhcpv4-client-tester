@@ -27,3 +27,10 @@ This project simulates **multiple DHCP clients** in parallel using raw sockets, 
 
 ```bash
 sudo python3 dhcp4-client.py
+
+# ==== CONFIG ====
+TOTAL_CLIENTS = 50         # Number of DHCP clients to simulate
+MAX_CONCURRENT = 10        # Maximum concurrent clients
+LEASE_DURATION = 30        # Hold leases for N seconds before releasing
+INTERFACE = 'en0'          # Interface 
+# =================
