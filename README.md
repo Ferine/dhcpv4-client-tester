@@ -26,11 +26,16 @@ This project simulates **multiple DHCP clients** in parallel using raw sockets, 
 ## 🛠️ Usage
 
 ```bash
-sudo python3 dhcp4-client.py
+# Standalone usage
+sudo python3 client/dhcp_simulator.py
+
+# Or with Docker
+docker-compose up
 
 # ==== CONFIG ====
+# Edit client/dhcp_simulator.py to configure:
 TOTAL_CLIENTS = 50         # Number of DHCP clients to simulate
 MAX_CONCURRENT = 10        # Maximum concurrent clients
 LEASE_DURATION = 30        # Hold leases for N seconds before releasing
-INTERFACE = 'en0'          # Interface 
+INTERFACE = 'eth0'         # Interface (eth0 in Docker, may be different on host)
 # =================
