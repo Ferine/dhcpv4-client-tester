@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+  # IPv4 DHCP Server
   dhcp-server:
     build:
       context: ./dhcpd
@@ -20,6 +21,7 @@ services:
       retries: 3
       start_period: 5s
 
+  # IPv4 DHCP Client
   dhcp-client:
     build:
       context: ./client
@@ -34,7 +36,51 @@ services:
       dhcpnet:
         ipv4_address: 172.28.0.3
 
+  # IPv6 DHCP Server
+  dhcpv6-server:
+    build:
+      context: ./dhcpd
+      dockerfile: Dockerfile6
+    container_name: dhcpv6-server
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    volumes:
+      - dhcpv6-leases:/var/lib/dhcp
+    networks:
+      dhcpnet6:
+        ipv6_address: fd00::2
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv6.conf.all.forwarding=1
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -tuln | grep ':547'"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # IPv6 DHCP Client
+  dhcpv6-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile6
+    container_name: dhcpv6-client
+    depends_on:
+      dhcpv6-server:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    networks:
+      dhcpnet6:
+        ipv6_address: fd00::3
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv6.conf.default.disable_ipv6=0
+
 networks:
+  # IPv4 network
   dhcpnet:
     driver: bridge
     ipam:
@@ -46,5 +92,19 @@ networks:
       com.docker.network.bridge.enable_ip_masquerade: "true"
       com.docker.network.driver.mtu: "1500"
 
+  # IPv6 network
+  dhcpnet6:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd00::/64
+          gateway: fd00::1
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
+
 volumes:
   dhcp-leases:
+  dhcpv6-leases:
