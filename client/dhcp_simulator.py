@@ -111,7 +111,8 @@ def dhcp_client_logic(client_id):
             stats["failed"] += 1
             return
 
-        print(f"[Client {client_id}] ✅ Lease {offered_ip} from {server_ip}")
+        mac_str = ':'.join(f'{b:02x}' for b in mac)
+        print(f"[Client {client_id}] ✅ Lease {offered_ip} from {server_ip} (MAC: {mac_str})")
         stats["success"] += 1
 
         # Add client info for later release
@@ -148,7 +149,8 @@ def send_release(mac, xid, ip, server_ip):
         )
         packet = bootp + options
         s.sendto(packet, (server_ip, 67))
-        print(f"[RELEASE] {ip} to {server_ip}")
+        mac_str = ':'.join(f'{b:02x}' for b in mac)
+        print(f"[RELEASE] {ip} to {server_ip} (MAC: {mac_str})")
         s.close()
     except Exception as e:
         print(f"[!] Failed to send release: {e}")
